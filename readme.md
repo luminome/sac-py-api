@@ -1,3 +1,6 @@
+This is for getting the position of planets and stuff.
+
+added infor to clone.
 sat-data: https://rhodesmill.org/skyfield/api-satellites.html#skyfield.sgp4lib.EarthSatellite
 
 iss-sat-data-source: https://celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=tle
