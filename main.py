@@ -1,15 +1,16 @@
 from flask import Flask, jsonify, abort
-import os
-from time import perf_counter, strftime, gmtime
-from datetime import datetime
+from flask_cors import CORS
 
-from skyfield.api import load as skyfieldload
-from skyfield.positionlib import position_of_radec, Geocentric
+import os
+from time import perf_counter
+
+from skyfield.api import load as skyFieldLoad
+from skyfield.positionlib import position_of_radec
 
 app = Flask(__name__)
+CORS(app)
 
 options = ['sun', 'moon', 'venus', 'mars', 'iss']
-
 
 @app.route('/')
 def index():
@@ -18,7 +19,7 @@ def index():
 
 @app.route('/sat/<path:selection>', methods=['GET'])
 def sat(selection):
-    ts = skyfieldload.timescale()
+    ts = skyFieldLoad.timescale()
     t = None
 
     if ':' in selection:
@@ -37,7 +38,7 @@ def sat(selection):
 
     loop_start = perf_counter()
 
-    eph = skyfieldload('de421.bsp')
+    eph = skyFieldLoad('de421.bsp')
 
 
 
@@ -49,7 +50,7 @@ def sat(selection):
         iss_id = 25544
         url = 'https://celestrak.org/NORAD/elements/gp.php?CATNR={}&FORMAT=tle'.format(iss_id)
         filename = 'tle-CATNR-{}.txt'.format(iss_id)
-        satellites = skyfieldload.tle_file(url, filename=filename)
+        satellites = skyFieldLoad.tle_file(url, filename=filename)
         element = satellites[0].at(t)
         so_type = element.__class__
         so_rpm = element.velocity.km_per_s
