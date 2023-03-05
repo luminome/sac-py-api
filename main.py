@@ -36,7 +36,8 @@ def sat(selection):
         abort(404, description="'{}' resource doesn't have a record.".format(selection))
 
     loop_start = perf_counter()
-    eph = skyfieldload('data/de421.bsp')
+
+    eph = skyfieldload('de421.bsp')
 
 
 
@@ -47,7 +48,7 @@ def sat(selection):
     if selection == 'iss':
         iss_id = 25544
         url = 'https://celestrak.org/NORAD/elements/gp.php?CATNR={}&FORMAT=tle'.format(iss_id)
-        filename = 'data/tle-CATNR-{}.txt'.format(iss_id)
+        filename = 'tle-CATNR-{}.txt'.format(iss_id)
         satellites = skyfieldload.tle_file(url, filename=filename)
         element = satellites[0].at(t)
         so_type = element.__class__
