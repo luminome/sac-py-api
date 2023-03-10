@@ -3,6 +3,8 @@
     "name": "sac-py-geo",
     "full_name": "luminome/sac-py-geo",
     "updated": "2023-03-09T15:21:45Z",
+    "description": "shapefile to json",
+    "html_url": "https://github.com/luminome/sac-py-geo",
     "url": "https://raw.githubusercontent.com/luminome/sac-py-geo/master/readme.md",
     "local": "static/sources/sac-py-geo.md"
   },
@@ -10,6 +12,8 @@
     "name": "three-sac",
     "full_name": "luminome/three-sac",
     "updated": "2023-03-08T22:35:56Z",
+    "description": "toolkit for three.js portable codebase",
+    "html_url": "https://github.com/luminome/three-sac",
     "url": "https://raw.githubusercontent.com/luminome/three-sac/master/readme.md",
     "local": "static/sources/three-sac.md"
   },
@@ -17,42 +21,56 @@
     "name": "geodesic-model",
     "full_name": "luminome/geodesic-model",
     "updated": "2023-03-08T08:31:52Z",
+    "description": "wedge: an incosahedral model for sperical projection",
+    "html_url": "https://github.com/luminome/geodesic-model",
     "url": "https://raw.githubusercontent.com/luminome/geodesic-model/master/readme.md"
   },
   {
     "name": "three-sac-space",
     "full_name": "luminome/three-sac-space",
     "updated": "2023-03-05T17:14:44Z",
+    "description": "first clone",
+    "html_url": "https://github.com/luminome/three-sac-space",
     "url": "https://raw.githubusercontent.com/luminome/three-sac-space/master/readme.md"
   },
   {
     "name": "three-sac-frontend",
     "full_name": "luminome/three-sac-frontend",
     "updated": "2023-03-05T16:57:41Z",
+    "description": "frontend componentry for three-sac node package",
+    "html_url": "https://github.com/luminome/three-sac-frontend",
     "url": "https://raw.githubusercontent.com/luminome/three-sac-frontend/master/readme.md"
   },
   {
     "name": "sac-py-api",
     "full_name": "luminome/sac-py-api",
     "updated": "2023-03-05T10:24:47Z",
+    "description": "python 3.8 testing api",
+    "html_url": "https://github.com/luminome/sac-py-api",
     "url": "https://raw.githubusercontent.com/luminome/sac-py-api/master/readme.md"
   },
   {
     "name": "wudi-model-update",
     "full_name": "luminome/wudi-model-update",
     "updated": "2023-02-08T21:50:23Z",
+    "description": "wudi data model update utility",
+    "html_url": "https://github.com/luminome/wudi-model-update",
     "url": "https://raw.githubusercontent.com/luminome/wudi-model-update/master/readme.md"
   },
   {
     "name": "wudi-model",
     "full_name": "luminome/wudi-model",
     "updated": "2023-01-31T14:31:10Z",
+    "description": "cnrs mio temporal wudi data modeling system",
+    "html_url": "https://github.com/luminome/wudi-model",
     "url": "https://raw.githubusercontent.com/luminome/wudi-model/master/readme.md"
   },
   {
     "name": "ctipe-frontend",
     "full_name": "luminome/ctipe-frontend",
     "updated": "2023-01-08T17:23:08Z",
+    "description": "this is data snacks",
+    "html_url": "https://github.com/luminome/ctipe-frontend",
     "url": "https://raw.githubusercontent.com/luminome/ctipe-frontend/master/readme.md",
     "local": "static/sources/ctipe-frontend.md"
   },
@@ -60,42 +78,56 @@
     "name": "ctipe",
     "full_name": "luminome/ctipe",
     "updated": "2023-01-04T13:29:51Z",
+    "description": null,
+    "html_url": "https://github.com/luminome/ctipe",
     "url": "https://raw.githubusercontent.com/luminome/ctipe/master/readme.md"
   },
   {
     "name": "obspkg-lite",
     "full_name": "luminome/obspkg-lite",
     "updated": "2022-06-27T14:32:08Z",
+    "description": null,
+    "html_url": "https://github.com/luminome/obspkg-lite",
     "url": "https://raw.githubusercontent.com/luminome/obspkg-lite/master/readme.md"
   },
   {
     "name": "obspkg-pythonProject",
     "full_name": "luminome/obspkg-pythonProject",
     "updated": "2022-05-14T12:31:34Z",
+    "description": null,
+    "html_url": "https://github.com/luminome/obspkg-pythonProject",
     "url": "https://raw.githubusercontent.com/luminome/obspkg-pythonProject/master/readme.md"
   },
   {
     "name": "chonk",
     "full_name": "luminome/chonk",
     "updated": "2022-05-12T23:37:55Z",
+    "description": "Basic Save",
+    "html_url": "https://github.com/luminome/chonk",
     "url": "https://raw.githubusercontent.com/luminome/chonk/master/readme.md"
   },
   {
     "name": "basic",
     "full_name": "luminome/basic",
     "updated": "2021-08-10T09:59:39Z",
+    "description": "2021 Dev for Plotter",
+    "html_url": "https://github.com/luminome/basic",
     "url": "https://raw.githubusercontent.com/luminome/basic/master/readme.md"
   },
   {
     "name": "aerosol",
     "full_name": "luminome/aerosol",
     "updated": "2021-05-13T15:53:42Z",
+    "description": "pyqt5 svg file viewer",
+    "html_url": "https://github.com/luminome/aerosol",
     "url": "https://raw.githubusercontent.com/luminome/aerosol/master/readme.md"
   },
   {
     "name": "runtime",
     "full_name": "luminome/runtime",
     "updated": "2021-03-19T23:14:09Z",
+    "description": "PyGame (py2.7) Game program design 2015-2016",
+    "html_url": "https://github.com/luminome/runtime",
     "url": "https://raw.githubusercontent.com/luminome/runtime/master/readme.md"
   }
 ]

@@ -2,22 +2,40 @@
 
 <html lang="en">
 <head>
-	<title>sac - space</title>
+	<title>og - luminome.com</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<style>
 		body {
 			background-color: rgba(50,50,50,1.0);
 			color: #CCCCCC;
-			margin:10px;
-			padding:10px;
+
 			font-family: heavy_data, sans-serif;
 			font-size:1em;
 		}
 
+		.row {
+			/*border: 1px red dotted;*/
+			display: flex;
+			flex-direction: row;
+			flex-wrap: wrap;
+			width: auto;
+		}
+
+		.column {
+			/*border: 1px red dotted;*/
+			display: flex;
+			flex-direction: column;
+			flex: 1;
+		}
+
+		.right {
+			text-align: right;
+		}
+
 		div.container{
 			background-color: rgba(0,0,0.2,1.0);
-			margin: 14px 0;
+			margin: 24px;
 		}
 
 		a{
@@ -28,13 +46,25 @@
 			color: #CCCCCC;
 		}
 
-		pre{
+		/*p{*/
+		/*	margin:0;*/
+		/*	padding:0;*/
+		/*}*/
 
-			background-color: rgba(70,70,70,1.0);
+		pre{
+			background-color: rgba(50,50,50,0.75);
 		}
 
-		pre, img, div.container{
+		pre, blockquote, div.container{
 			padding:14px;
+
+		}
+
+		.title{
+			font-size: 1.4em;
+		}
+
+		img, pre, blockquote, div.container{
 			border-radius:14px;
 		}
 
@@ -53,10 +83,23 @@
 </head>
 <body>
 
+<div class="container">
+	<div class="row">
+		<div class="column">{{header.root}} see also:<a href="https://scottandrecampbell.com">scottandrecampbell.com</a></div>
+		<div class="column right">{{header.id}}</div>
+	</div>
+	<span>this is everything at github.com</span>
+</div>
+
+
 {% for mkd_text in result %}
 	<div class="container">
-		<p>{{mkd_text.name}}</p>
+		<div class="row">
+			<div class="column title">{{mkd_text.name}}</div>
+			<div class="column right">{{mkd_text.description}} {{mkd_text.id}}</div>
+		</div>
 		<p>{{mkd_text.file|markdown}}</p>
+		<p><a href="{{mkd_text.html_url}}">{{mkd_text.html_url}}</a></p>
 	</div>
 {% endfor %}
 
