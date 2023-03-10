@@ -1,20 +1,91 @@
-from flask import Flask, jsonify, abort
+from flask import Flask, jsonify, abort, render_template, request
+from flaskext.markdown import Markdown
+
 from flask_cors import CORS
 
 import os
 from time import perf_counter
+import json
+import requests
 
 from skyfield.api import load as skyFieldLoad
 from skyfield.positionlib import position_of_radec
 
+
+#https://raw.githubusercontent.com/luminome/ctipe-frontend/master/readme.md
+
 app = Flask(__name__)
+app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+
+
+# Flask(__name__, template_folder="static/templates")
 CORS(app)
+Markdown(app)
 
 options = ['sun', 'moon', 'venus', 'mars', 'iss']
 
+
+def sort_repos(data_json):
+    result = [{'name': repo['name'], 'full_name': repo['full_name'], 'updated': repo['updated_at']} for repo in data_json]
+    result = sorted(result, key=lambda k: k['updated'])
+    result.reverse()
+    return result
+
+
+@app.route('/update_from_repos')
+def get_git_user_update():
+    repo_data_url = "https://api.github.com/users/luminome/repos"
+    r = requests.get(repo_data_url, allow_redirects=True)
+    json_res = r.content.decode('utf8').replace("'", '"')
+    data = json.loads(json_res)
+    with open('static/sources/git_repos.json', "w") as file:
+        json.dump(data, file, indent=2)
+    return jsonify(sort_repos(data))
+
+
+@app.route('/get')
+def get_data_from_user():
+    # with open('user.json') as user_file:
+    #     parsed_json = json.load(user_file)
+    with open('static/sources/git_repos.json') as file:
+        data = json.load(file)
+        data_abbr = sort_repos(data)
+        for abbr in data_abbr:
+            url = 'https://raw.githubusercontent.com/{}/master/readme.md'.format(abbr['full_name'])
+            abbr['url'] = url
+            r = requests.get(url, allow_redirects=True)
+            if b'404' not in r.content:
+                abbr['local'] = 'static/sources/{}.md'.format(abbr['name'])
+                with open(abbr['local'], 'wb') as md_file:
+                    md_file.write(r.content)
+
+        with open('static/sources/git_repos_shorthand.json', "w") as repo_file:
+            json.dump(data_abbr, repo_file, indent=2)
+
+        return jsonify({'result': data_abbr})
+
+
 @app.route('/')
 def index():
-    return jsonify({"json": "hello-world python."})
+    # repo_data_url = "https://api.github.com/users/luminome/repos"
+    # r = requests.get(repo_data_url, allow_redirects=True)
+    #
+    # url = 'https://raw.githubusercontent.com/luminome/ctipe-frontend/master/readme.md'
+    # r = requests.get(url, allow_redirects=True)
+    # open('static/sources/ctipe-frontend.md', 'wb').write(r.content)
+
+    with open('static/sources/git_repos_shorthand.json') as file:
+        data = json.load(file)
+
+    files_array = []
+    for repo in data:
+        if 'local' in repo:
+            with open(repo['local'], 'r') as file:
+                files_array.append({'name': repo['name'], 'file': file.read()})
+
+    #mkd_text = str(r.content)  #;//  #"## Your Markdown Here "
+    return render_template('index.html', result=files_array)
+    # return jsonify({"json": "hello-world python."})
 
 
 @app.route('/sat/<path:selection>', methods=['GET'])
@@ -39,12 +110,6 @@ def sat(selection):
     loop_start = perf_counter()
 
     eph = skyFieldLoad('de421.bsp')
-
-
-
-    so = None
-    so_rpm = None
-    so_type = None
 
     if selection == 'iss':
         iss_id = 25544
@@ -84,7 +149,8 @@ def sat(selection):
 
 @app.route('/env')
 def environment():
-    return jsonify(dict(os.environ))
+    r = request.url_root
+    return jsonify({'r': r, 'os.env': dict(os.environ)})
 
 
 @app.errorhandler(404)

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+	<title>sac - space</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<style>
+		body {
+			background-color: rgba(50,50,50,1.0);
+			color: #CCCCCC;
+			margin:10px;
+			padding:10px;
+			font-family: heavy_data, sans-serif;
+			font-size:1em;
+		}
+
+		div.container{
+			background-color: rgba(0,0,0.2,1.0);
+			margin: 14px 0;
+		}
+
+		a{
+			color: white;
+		}
+
+		a:visited{
+			color: #CCCCCC;
+		}
+
+		pre{
+
+			background-color: rgba(70,70,70,1.0);
+		}
+
+		pre, img, div.container{
+			padding:14px;
+			border-radius:14px;
+		}
+
+		@font-face {
+			font-family: heavy_data;
+			font-weight: normal;
+			font-feature-settings: normal;
+			src: url(/static/font/dinregularwebfont.ttf);
+		}
+
+		@font-face {
+			font-family: heavy_data_bold;
+			src: url(/static/font/din-medium.ttf);
+		}
+	</style>
+</head>
+<body>
+
+{% for mkd_text in result %}
+	<div class="container">
+		<p>{{mkd_text.name}}</p>
+		<p>{{mkd_text.file|markdown}}</p>
+	</div>
+{% endfor %}
+
+<a href="/">standard</a>
+
+</body>
+</html>
+
