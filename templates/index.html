@@ -8,10 +8,10 @@
 	<style>
 		body {
 			background-color: rgba(50,50,50,1.0);
-			color: #CCCCCC;
-
+			color: gray;
 			font-family: heavy_data, sans-serif;
-			font-size:1em;
+			font-size: 0.9em;
+			line-height: 1.2em;
 		}
 
 		.row {
@@ -20,6 +20,9 @@
 			flex-direction: row;
 			flex-wrap: wrap;
 			width: auto;
+			margin-bottom: 0.9em;
+			color: antiquewhite;
+			font-size: 1.5em;
 		}
 
 		.column {
@@ -35,36 +38,62 @@
 
 		div.container{
 			background-color: rgba(0,0,0.2,1.0);
-			margin: 24px;
+			margin: 2%;
 		}
 
-		a{
-			color: white;
+		a, .md-link, a .svg-positive{
+			text-decoration: none;
+			color: antiquewhite;
+			fill: antiquewhite;
 		}
 
-		a:visited{
-			color: #CCCCCC;
+		a:visited, .md-link:visited, a:visited .svg-positive{
+			color: lightgray;
+			fill: lightgray;
 		}
 
-		/*p{*/
-		/*	margin:0;*/
-		/*	padding:0;*/
-		/*}*/
+		.link-box{
+			/*border: 1px red dotted;*/
+			width: auto;
+			max-width: 100%;
+			overflow: hidden;
+			display: inline-block;
+			vertical-align: middle;
+			text-overflow: ellipsis;
+		}
+
+		.link-full:hover .link-icon{
+			opacity: 1.0;
+		}
+
+		.link-full{
+			white-space: nowrap;
+		}
+
+		.markdown{
+			background-color: rgba(50,50,50,0.5);
+			margin: 0.5em 0;
+		}
+
+		p{
+			margin-block-start: 0px;
+			margin-block-end: 0px;
+			margin-inline-start: 0px;
+			margin-inline-end: 0px;
+		}
 
 		pre{
 			background-color: rgba(50,50,50,0.75);
+			overflow-x: scroll;
 		}
 
-		pre, blockquote, div.container{
-			padding:14px;
-
+		pre, blockquote, div.container, div.markdown{
+			padding:2%;
 		}
 
-		.title{
-			font-size: 1.4em;
-		}
 
-		img, pre, blockquote, div.container{
+
+		img, pre, blockquote, div.container, div.markdown{
 			border-radius:14px;
 		}
 
@@ -79,15 +108,36 @@
 			font-family: heavy_data_bold;
 			src: url(/static/font/din-medium.ttf);
 		}
+
+		.link-icon {
+			width:1em;
+			vertical-align:text-top;
+			margin-right:2px;
+			opacity:0.5;
+		}
+
+		.svg-mask{
+			fill:#333333;
+		}
+
+		.svg-positive{
+			fill:darkorange;
+		}
+
+		.hidden{
+			display: none;
+		}
+
 	</style>
 </head>
 <body>
 
 <div class="container">
 	<div class="row">
-		<div class="column">{{header.root}} see also:<a href="https://scottandrecampbell.com">scottandrecampbell.com</a></div>
+		<div class="column">{{header.root}}</div>
 		<div class="column right">{{header.id}}</div>
 	</div>
+	<p><a href="https://scottandrecampbell.com">See also: scottandrecampbell.com</a></p>
 	<span>this is everything at github.com</span>
 </div>
 
@@ -96,14 +146,81 @@
 	<div class="container">
 		<div class="row">
 			<div class="column title">{{mkd_text.name}}</div>
-			<div class="column right">{{mkd_text.description}} {{mkd_text.id}}</div>
+			<div class="column right">{{mkd_text.id}}</div>
 		</div>
-		<p>{{mkd_text.file|markdown}}</p>
+		<p class="date">{{mkd_text.updated}}</p>
+		<p>{{mkd_text.description}}</p>
 		<p><a href="{{mkd_text.html_url}}">{{mkd_text.html_url}}</a></p>
+		<div class="markdown">{{mkd_text.file|markdown}}</div>
+
 	</div>
 {% endfor %}
 
-<a href="/">standard</a>
+<svg id="link-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" xml:space="preserve">
+	<path class="svg-mask" d="M24.9,29.1H7.1c-2.3,0-4.2-1.9-4.2-4.2V7.1c0-2.3,1.9-4.2,4.2-4.2h17.8c2.3,0,4.2,1.9,4.2,4.2v17.8
+		C29.1,27.2,27.2,29.1,24.9,29.1z"/>
+	<path class="svg-positive" d="M24.9,1.3H7.1c-3.2,0-5.8,2.6-5.8,5.8v17.8c0,3.2,2.6,5.8,5.8,5.8h17.8c3.2,0,5.8-2.6,5.8-5.8V7.1
+		C30.7,3.9,28.1,1.3,24.9,1.3z M27.5,24.9c0,1.4-1.2,2.6-2.6,2.6H7.1c-1.4,0-2.6-1.2-2.6-2.6V7.1c0-1.4,1.2-2.6,2.6-2.6h17.8
+		c1.4,0,2.6,1.2,2.6,2.6V24.9z M14.4,11.9l10.4,10.4l-2.5,2.5L11.9,14.4l1.1,6.9l-3.5,0.5L7.2,7.2l14.6,2.3L21.3,13L14.4,11.9z"/>
+</svg>
+
+<script>
+
+	const p_tags = document.getElementsByTagName('p');
+	//URLs starting with http://, https://, or ftp://
+	//https://stackoverflow.com/questions/37684/how-to-replace-plain-urls-with-links
+	const replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+
+
+	for(let p of p_tags){
+		if(p.firstElementChild === null && p.textContent.indexOf('http') !== -1){
+			const contents = p.textContent;
+    		p.innerHTML = contents.replace(replacePattern1, '<a class="md-link" href="$1" target="_blank">$1</a>');
+		}
+	}
+
+	const svg_link = document.getElementById('link-icon');
+	const links = document.getElementsByTagName('a');
+	const link_box = document.createElement('div');
+	link_box.classList.add('link-box');
+
+	for(let a of links){
+
+
+		if(!a.querySelector(':first-of-type img')){
+			const boxy = link_box.cloneNode(true);
+			const parent = a.parentNode;
+			a.classList.add('link-full');
+
+			const icon = svg_link.cloneNode(true);
+			icon.removeAttribute('id');
+			icon.classList.remove('hidden');
+			icon.classList.add('link-icon');
+			a.prepend(icon);
+
+			parent.insertBefore(boxy, a);
+
+			parent.querySelector('.link-box').appendChild(a);
+			// boxy.appendChild(a);
+		}
+
+
+	}
+
+	// console.log([...links].filter(e => e.parentNode.tagName !== 'a' && e.textContent.indexOf('http')!==-1).map(e=>e.textContent));
+	//
+	//
+	// const parentElement = document.getElementById('text')
+	// const newElement = Object.assign(document.createElement('a'), {
+	//   href: 'example.org',
+	//   textContent: parentElement.textContent
+	// })
+	// parentElement.textContent = ''
+	// parentElement.appendChild(newElement)
+</script>
+
+
+
 
 </body>
 </html>

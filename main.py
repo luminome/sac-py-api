@@ -2,27 +2,82 @@ from flask import Flask, jsonify, abort, render_template, request
 from flaskext.markdown import Markdown
 from os import getpid
 from flask_cors import CORS
-
+from datetime import datetime
 import os
 from time import perf_counter
 import json
 import requests
-
+from typing import List
 from skyfield.api import load as skyFieldLoad
 from skyfield.positionlib import position_of_radec
 
 
-#https://raw.githubusercontent.com/luminome/ctipe-frontend/master/readme.md
-
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-
-
-# Flask(__name__, template_folder="static/templates")
 CORS(app)
 Markdown(app)
 
-options = ['sun', 'moon', 'venus', 'mars', 'iss']
+
+class DictObject:
+    def __init__(self, response):
+        self.__dict__['_response'] = response
+
+    def __getitem__(self, key):
+        try:
+            return self.__dict__['_response'][key]
+        except KeyError:
+            pass
+        try:
+            return self.__dict__[key]
+        except KeyError:
+            raise AttributeError(key)
+
+    def __getattr__(self, key):
+        # First, try to return from _response
+        try:
+            return self.__dict__['_response'][key]
+        except KeyError:
+            pass
+        # If that fails, return default behavior so we don't break Python
+        try:
+            return self.__dict__[key]
+        except KeyError:
+            raise AttributeError(key)
+
+
+def load_json(path):
+    if os.path.exists(path):
+        with open(path) as json_file:
+            return json.load(json_file)
+    else:
+        print('file not found')
+        return {'result': None}
+
+
+def save_json(new_json, path):
+    with open(path, "w") as json_file:
+        json.dump(new_json, json_file, indent=2)
+
+
+def save_file(the_bytes, path):
+    with open(path, "wb") as the_file:
+        the_file.write(the_bytes)
+
+
+config = DictObject(load_json('config.json'))
+options = config.sat_options
+data_store = load_json(config.data_store)
+
+
+def data_store_merge(data: List):
+    for i in data:
+        if i['name'] not in data_store:
+            data_store[i['name']] = i
+        else:
+            for k in i.keys():
+                data_store[i['name']][k] = i[k]
+
+    save_json(data_store, config.data_store)
 
 
 def sort_repos(data_json):
@@ -41,49 +96,116 @@ def sort_repos(data_json):
     return result
 
 
-@app.route('/update_from_repos')
-def get_git_user_update():
+def get_git_repository_update():
     repo_data_url = "https://api.github.com/users/luminome/repos"
     r = requests.get(repo_data_url, allow_redirects=True)
     json_res = r.content.decode('utf8').replace("'", '"')
     data = json.loads(json_res)
-    with open('static/sources/git_repos.json', "w") as file:
-        json.dump(data, file, indent=2)
-    return jsonify(sort_repos(data))
+    data = sort_repos(data)
+    save_json(data, config.source_path+'/git_projects.json')
+    return data
 
 
-@app.route('/get')
-def get_data_from_user():
-    # with open('user.json') as user_file:
-    #     parsed_json = json.load(user_file)
-    with open('static/sources/git_repos.json') as file:
-        data = json.load(file)
-        data_abbr = sort_repos(data)
-        for abbr in data_abbr:
-            url = 'https://raw.githubusercontent.com/{}/master/readme.md'.format(abbr['full_name'])
+def get_local_projects():
+    loop_start = perf_counter()
+    t_config = DictObject(load_json('config.json'))
+    stash = []
+
+    def local_projects():
+        for root, dirs, files in os.walk(t_config.sites):
+            for filename in files:
+                omit = [x in root for x in t_config.sites_omitted_dirs]
+                if True not in omit and 'readme.md' in filename.lower():
+                    path = os.path.join(root, filename)
+                    path_dir = os.path.basename(root)
+                    t = os.path.getmtime(root)
+                    d = datetime.fromtimestamp(t)
+                    local_readme_path = config.source_path+'/'+path_dir+'.md'
+                    stash.append(
+                        {
+                            "path": path,
+                            "name": path_dir,
+                            "updated": d.isoformat() + 'Z',
+                            "local": local_readme_path,
+                            "type": 'local'
+                        }
+                    )
+
+    local_projects()
+    data_store_merge(stash)
+
+    for k in data_store.keys():
+        if data_store[k] and data_store[k]['type'] is 'local':
+            with open(data_store[k]['path'], "r") as the_file:
+                save_file(bytes(the_file.read(), 'utf-8'), config.source_path+'/'+data_store[k]['name']+'.md')
+
+    loop_stop = perf_counter()
+    loop_time = "%.4fs" % (loop_stop - loop_start)
+
+    return jsonify({'time': loop_time, 'result': stash})
+
+
+@app.route('/update_repository_data')
+def save_repository_data():
+    def find_readme(item):
+        for readme in ['readme', 'README']:
+            readme_url = 'https://raw.githubusercontent.com/{}/master/{}.md'.format(item['full_name'], readme)
+            r = requests.get(readme_url, allow_redirects=True)
+            if b'404: Not Found' not in r.content:
+                return r.content, readme_url
+        return None, None
+
+    data_abbr = get_git_repository_update()
+
+    for abbr in data_abbr:
+        abbr['type'] = 'remote'
+        content, url = find_readme(abbr)
+        if content is not None:
             abbr['url'] = url
-            r = requests.get(url, allow_redirects=True)
+            abbr['local'] = config.source_path+'/{}.md'.format(abbr['name'])
+            save_file(content, abbr['local'])
 
-            if b'404' not in r.content:
-                abbr['local'] = 'static/sources/{}.md'.format(abbr['name'])
-                with open(abbr['local'], 'wb') as md_file:
-                    md_file.write(r.content)
+    data_store_merge(data_abbr)
+    save_json(data_abbr, config.source_path + '/git_projects_info.json')
 
-        with open('static/sources/git_repos_shorthand.json', "w") as repo_file:
-            json.dump(data_abbr, repo_file, indent=2)
+    return jsonify({'result': data_abbr})
 
-        return jsonify({'result': data_abbr})
+
+@app.route('/test')
+def local_test():
+    if 'localhost' in request.url_root:
+        return get_local_projects()
+
+
+@app.route('/load_external_configuration')
+def external_test_gdrive():
+    url = config.drive_conf_url
+    r = requests.get(url, allow_redirects=True)
+    print(r)
+    with open(config.source_path+'/gdrive_projects_meta.json', 'wb') as gd_file:
+        gd_file.write(r.content)
+
+    return jsonify({'result': None})
 
 
 @app.route('/')
 def index():
-    with open('static/sources/git_repos_shorthand.json') as file:
+    if not os.path.exists('static/sources/git_projects_info.json'):
+        no_response = save_repository_data()
+
+    with open('static/sources/git_projects_info.json') as file:
         data = json.load(file)
 
     files_array = []
 
     for i, repo in enumerate(data):
-        k = {'id': str(i).zfill(2), 'name': repo['name'], 'description': repo['description'], 'html_url': repo['html_url']}
+        pre_k = repo
+        pre_k['id'] = str(i).zfill(2)
+        k = {}
+
+        for ke in pre_k.keys():
+            if pre_k[ke] is not None:
+                k[ke] = pre_k[ke]
 
         if 'local' in repo:
             with open(repo['local'], 'r') as file:
@@ -95,6 +217,11 @@ def index():
 
     header = {'root': request.url_root, 'id': 'hello'}
     return render_template('index.html', result=files_array, header=header)
+
+    # except FileNotFoundError:
+    #     get_git_user_update()
+    #     get_data_from_user()
+    #     index()
 
 
 @app.route('/sat/<path:selection>', methods=['GET'])
@@ -148,7 +275,7 @@ def sat(selection):
     }
 
     loop_stop = perf_counter()
-    loop_time = "%.4fs" % (loop_stop-loop_start)
+    loop_time = "%.4fs" % (loop_stop - loop_start)
     packet['path'] = selection
     packet['time'] = t.utc_strftime(format='%Y-%m-%d %H:%M:%S UTC')
     packet['exec_time'] = loop_time
@@ -171,7 +298,7 @@ def page_not_found(e):
 if __name__ == '__main__':
     #lsof -i :5000
     print("Creating PID file.")
-    fh = open("app_process.pid", "w")
+    fh = open(config.source_path+"/app_process.pid", "w")
     fh.write(str(getpid()))
     fh.close()
 
