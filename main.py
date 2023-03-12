@@ -175,6 +175,11 @@ def save_repository_data():
     return jsonify({'result': data_abbr})
 
 
+@app.route('/data_store')
+def get_data_store():
+    return jsonify({'time': None, 'result': load_json(config.data_store)})
+
+
 @app.route('/test')
 def local_test():
     if 'localhost' in request.url_root:
@@ -232,8 +237,11 @@ def index():
                         k[ke] = repo[ke]
 
                 if 'local' in repo:
-                    with open(repo['local'], 'r') as file:
-                        k['file'] = file.read()
+                    try:
+                        with open(repo['local'], 'r') as file:
+                            k['file'] = file.read()
+                    except FileNotFoundError:
+                        k['file'] = 'no readme.md'
                 else:
                     k['file'] = 'no readme.md'
 
