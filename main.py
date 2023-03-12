@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, abort, render_template, request
 from flaskext.markdown import Markdown
-from flask_api_key import APIKeyManager
 
 from os import getpid
 from flask_cors import CORS
@@ -13,29 +12,10 @@ from typing import List
 from skyfield.api import load as skyFieldLoad
 from skyfield.positionlib import position_of_radec
 
-
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-# app.config['FLASK_API_KEY_SECRET_LENGTH'] = 64
-my_key_manager = APIKeyManager(app)
-
 CORS(app)
 Markdown(app)
-
-
-loc = list(my_key_manager.config)
-for i in loc:
-    print(i, my_key_manager.config[i])
-
-
-# my_key_manager.init_app(app)
-
-def test_connection(self):
-    with self.app_context():
-        my_key = my_key_manager.create('MY_FIRST_KEY')
-        print(my_key.secret)
-
-
 
 
 
@@ -236,8 +216,6 @@ def get_sources():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
-        print(request.json)
-
 
         data = load_json(config.data_store)
         files_array = []
@@ -270,8 +248,12 @@ def index():
         return render_template('index.html', result=files_array, header=header)
 
     else:
+        k = os.environ['SPAM']
+        if 'api_key' in request.json.keys():
+            if request.json['api_key'] == k:
+                return jsonify({'result': [{'msg': 'something posted'}, request.json], 'time': None})
 
-        return jsonify({'result': [{'msg': 'something posted'}, request.json], 'time': None})
+        abort(404, description="no api_key")
 
 
 @app.route('/sat/<path:selection>', methods=['GET'])
@@ -336,7 +318,8 @@ def sat(selection):
 @app.route('/env')
 def environment():
     r = request.url_root
-    return jsonify({'r': r, 'os.env': dict(os.environ)})
+    return jsonify({'r': r})
+    #, 'os.env': dict(os.environ)
 
 
 @app.errorhandler(404)
@@ -345,11 +328,6 @@ def page_not_found(e):
     return jsonify({'error': str(e)})
 
 
-@app.route('/gen')
-def ge_key():
-    test_connection(app)
-
-    
 if __name__ == '__main__':
     #lsof -i :5000
     print("Creating PID file.")
