@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, abort, render_template, request
 from flaskext.markdown import Markdown
+from flask_api_key import APIKeyManager
+
 from os import getpid
 from flask_cors import CORS
 from datetime import datetime
@@ -14,8 +16,28 @@ from skyfield.positionlib import position_of_radec
 
 app = Flask(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
+# app.config['FLASK_API_KEY_SECRET_LENGTH'] = 64
+my_key_manager = APIKeyManager(app)
+
 CORS(app)
 Markdown(app)
+
+
+loc = list(my_key_manager.config)
+for i in loc:
+    print(i, my_key_manager.config[i])
+
+
+# my_key_manager.init_app(app)
+
+def test_connection(self):
+    with self.app_context():
+        my_key = my_key_manager.create('MY_FIRST_KEY')
+        print(my_key.secret)
+
+
+
+
 
 
 class DictObject:
@@ -67,6 +89,8 @@ def save_file(the_bytes, path):
 config = DictObject(load_json('config.json'))
 options = config.sat_options
 data_store = load_json(config.data_store)
+
+
 
 
 def data_store_merge(data: List):
@@ -212,6 +236,9 @@ def get_sources():
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'GET':
+        print(request.json)
+
+
         data = load_json(config.data_store)
         files_array = []
 
@@ -318,11 +345,18 @@ def page_not_found(e):
     return jsonify({'error': str(e)})
 
 
+@app.route('/gen')
+def ge_key():
+    test_connection(app)
+
+    
 if __name__ == '__main__':
     #lsof -i :5000
     print("Creating PID file.")
     fh = open(config.data_path+"/app_process.pid", "w")
     fh.write(str(getpid()))
     fh.close()
+
+    #test_connection(app)
 
     app.run(debug=True, port=os.getenv("PORT", default=5000))

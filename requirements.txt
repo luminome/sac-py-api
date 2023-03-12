@@ -10,3 +10,4 @@ MarkupSafe==1.1.1
 Werkzeug==1.0.1
 skyfield==1.33
 requests~=2.25.0
+flask-api-key==0.2.2
