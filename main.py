@@ -229,12 +229,13 @@ def require_api_key(view_function):
         if request.headers.get('x-api-key') and request.headers.get('x-api-key') == key:
             return view_function(*args, **kwargs)
         else:
+            print("invalidated")
             abort(404, description="api_key missing or incorrect.")
 
     return decorated_function
 
 
-@app.route('/io', methods=['POST'])
+@app.route('/io/', methods=['POST'])
 @require_api_key
 def get_io():
     return jsonify({'result': [{'msg': 'something posted'}, request.json], 'time': None})
