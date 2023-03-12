@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, abort, render_template, request
 from flaskext.markdown import Markdown
+from functools import wraps
 
 from os import getpid
 from flask_cors import CORS
@@ -218,50 +219,73 @@ def get_sources():
     return jsonify({'time': loop_time, 'result': stash})
 
 
-@app.route('/', methods=['GET', 'POST'])
+# The actual decorator function
+def require_api_key(view_function):
+    @wraps(view_function)
+    # the new, post-decoration function. Note *args and **kwargs here.
+    def decorated_function(*args, **kwargs):
+        key = os.environ['SPAM']
+        #if request.args.get('key') and request.args.get('key') == key:
+        if request.headers.get('x-api-key') and request.headers.get('x-api-key') == key:
+            return view_function(*args, **kwargs)
+        else:
+            abort(404, description="api_key missing or incorrect.")
+
+    return decorated_function
+
+
+@app.route('/io', methods=['POST'])
+@require_api_key
+def get_io():
+    return jsonify({'result': [{'msg': 'something posted'}, request.json], 'time': None})
+
+
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'GET':
+    # if request.method == 'GET':
 
-        data = load_json(config.data_store)
-        files_array = []
+    data = load_json(config.data_store)
+    files_array = []
 
-        for i, element in enumerate(data.keys()):
-            repo = data[element]
+    for i, element in enumerate(data.keys()):
+        repo = data[element]
 
-            if repo is not None:
-                repo['id'] = str(i).zfill(2)
-                k = {}
+        if repo is not None:
+            repo['id'] = str(i).zfill(2)
+            k = {}
 
-                for ke in repo.keys():
-                    if repo[ke] is not None:
-                        k[ke] = repo[ke]
+            for ke in repo.keys():
+                if repo[ke] is not None:
+                    k[ke] = repo[ke]
 
-                if 'local' in repo:
-                    try:
-                        with open(repo['local'], 'r') as file:
-                            k['file'] = file.read()
-                    except FileNotFoundError:
-                        k['file'] = 'no readme.md'
-                else:
+            if 'local' in repo:
+                try:
+                    with open(repo['local'], 'r') as file:
+                        k['file'] = file.read()
+                except FileNotFoundError:
                     k['file'] = 'no readme.md'
+            else:
+                k['file'] = 'no readme.md'
 
-                files_array.append(k)
+            files_array.append(k)
 
-        #sort_repos(files_array)
+    #sort_repos(files_array)
 
-        files_array = sorted(files_array, key=lambda k: k['updated'])
-        files_array.reverse()
+    files_array = sorted(files_array, key=lambda k: k['updated'])
+    files_array.reverse()
 
-        header = {'root': request.url_root, 'id': 'hello'}
-        return render_template('index.html', result=files_array, header=header)
+    header = {'root': request.url_root, 'id': 'hello'}
+    return render_template('index.html', result=files_array, header=header)
 
-    else:
-        k = os.environ['SPAM']
-        if 'api_key' in request.json.keys():
-            if request.json['api_key'] == k:
-                return jsonify({'result': [{'msg': 'something posted'}, request.json], 'time': None})
+    # else:
+    #     k = os.environ['SPAM']
+    #     if 'api_key' in request.json.keys():
+    #         if request.json['api_key'] == k:
+    #             request.json['api_key'] = 'collected'
+    #
+    #             return jsonify({'result': [{'msg': 'something posted'}, request.json], 'time': None})
+    #
 
-        abort(404, description="no api_key")
 
 
 @app.route('/sat/<path:selection>', methods=['GET'])
