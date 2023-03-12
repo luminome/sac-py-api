@@ -102,7 +102,7 @@ def get_git_repository_update():
     json_res = r.content.decode('utf8').replace("'", '"')
     data = json.loads(json_res)
     data = sort_repos(data)
-    save_json(data, config.source_path+'/git_projects.json')
+    save_json(data, config.data_path+'/git_projects.json')
     return data
 
 
@@ -135,7 +135,7 @@ def get_local_projects():
     data_store_merge(stash)
 
     for k in data_store.keys():
-        if data_store[k] and data_store[k]['type'] is 'local':
+        if data_store[k] and data_store[k]['type'] == 'local':
             with open(data_store[k]['path'], "r") as the_file:
                 save_file(bytes(the_file.read(), 'utf-8'), config.source_path+'/'+data_store[k]['name']+'.md')
 
@@ -166,7 +166,7 @@ def save_repository_data():
             save_file(content, abbr['local'])
 
     data_store_merge(data_abbr)
-    save_json(data_abbr, config.source_path + '/git_projects_info.json')
+    # save_json(data_abbr, config.source_path + '/git_projects_info.json')
 
     return jsonify({'result': data_abbr})
 
@@ -188,40 +188,63 @@ def external_test_gdrive():
     return jsonify({'result': None})
 
 
-@app.route('/')
+@app.route('/sources')
+def get_sources():
+    loop_start = perf_counter()
+    stash = []
+    for root, dirs, files in os.walk(config.source_path):
+        for filename in files:
+            path = os.path.join(root, filename)
+            t = os.path.getmtime(path)
+            d = datetime.fromtimestamp(t)
+            stash.append({
+                "file": filename,
+                "path": path,
+                "updated": d.isoformat() + 'Z'
+            })
+
+    loop_stop = perf_counter()
+    loop_time = "%.4fs" % (loop_stop - loop_start)
+
+    return jsonify({'time': loop_time, 'result': stash})
+
+
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    if not os.path.exists('static/sources/git_projects_info.json'):
-        no_response = save_repository_data()
+    if request.method == 'GET':
+        data = load_json(config.data_store)
+        files_array = []
 
-    with open('static/sources/git_projects_info.json') as file:
-        data = json.load(file)
+        for i, element in enumerate(data.keys()):
+            repo = data[element]
 
-    files_array = []
+            if repo is not None:
+                repo['id'] = str(i).zfill(2)
+                k = {}
 
-    for i, repo in enumerate(data):
-        pre_k = repo
-        pre_k['id'] = str(i).zfill(2)
-        k = {}
+                for ke in repo.keys():
+                    if repo[ke] is not None:
+                        k[ke] = repo[ke]
 
-        for ke in pre_k.keys():
-            if pre_k[ke] is not None:
-                k[ke] = pre_k[ke]
+                if 'local' in repo:
+                    with open(repo['local'], 'r') as file:
+                        k['file'] = file.read()
+                else:
+                    k['file'] = 'no readme.md'
 
-        if 'local' in repo:
-            with open(repo['local'], 'r') as file:
-                k['file'] = file.read()
-        else:
-            k['file'] = 'no readme.md'
+                files_array.append(k)
 
-        files_array.append(k)
+        #sort_repos(files_array)
 
-    header = {'root': request.url_root, 'id': 'hello'}
-    return render_template('index.html', result=files_array, header=header)
+        files_array = sorted(files_array, key=lambda k: k['updated'])
+        files_array.reverse()
 
-    # except FileNotFoundError:
-    #     get_git_user_update()
-    #     get_data_from_user()
-    #     index()
+        header = {'root': request.url_root, 'id': 'hello'}
+        return render_template('index.html', result=files_array, header=header)
+
+    else:
+
+        return jsonify({'result': [{'msg': 'something posted'}, request.json], 'time': None})
 
 
 @app.route('/sat/<path:selection>', methods=['GET'])
@@ -298,7 +321,7 @@ def page_not_found(e):
 if __name__ == '__main__':
     #lsof -i :5000
     print("Creating PID file.")
-    fh = open(config.source_path+"/app_process.pid", "w")
+    fh = open(config.data_path+"/app_process.pid", "w")
     fh.write(str(getpid()))
     fh.close()
 
