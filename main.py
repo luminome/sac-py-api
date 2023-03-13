@@ -532,6 +532,12 @@ def environment():
         r = request.url_root
     except AttributeError:
         r = None
+
+    with app.app_context():
+        print('init db.')
+
+        if not os.path.exists('db.sqlite'):
+            db.create_all()
     #, 'f': app.config["flare"].decode('utf-8')
 
     data = {'message': 'Done', 'code': 'SUCCESS', 'r': r}
@@ -549,16 +555,18 @@ def page_not_found(e):
     return jsonify({'error': str(e)})
 
 
+@app.before_first_request
+def before_first_request_func():
+    print("This function will run once")
+
+
+
 if __name__ == '__main__':
     #lsof -i :5000
     #format= '%(asctime)s-%(process)d-%(levelname)s-%(message)s'
     # logging.basicConfig(filename='app.log', filemode='w+', format='%(asctime)s-%(process)d-%(levelname)s-%(message)s')
 
-    with app.app_context():
-        print('init db.')
 
-        if not os.path.exists('db.sqlite'):
-            db.create_all()
         #test_connection(app)
 
     #handshake_send()
