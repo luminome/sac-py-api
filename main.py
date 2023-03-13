@@ -28,11 +28,91 @@ from skyfield.api import load as skyFieldLoad
 from skyfield.positionlib import position_of_radec
 
 # import logging
-
 # logging.basicConfig(filename='app.log', filemode='w+', format='%(name)s - %(levelname)s - %(message)s')
 
+
+class DictObject:
+    def __init__(self, response):
+        self.__dict__['_response'] = response
+
+    def __getitem__(self, key):
+        try:
+            return self.__dict__['_response'][key]
+        except KeyError:
+            pass
+        try:
+            return self.__dict__[key]
+        except KeyError:
+            raise AttributeError(key)
+
+    def __getattr__(self, key):
+        # First, try to return from _response
+        try:
+            return self.__dict__['_response'][key]
+        except KeyError:
+            pass
+        # If that fails, return default behavior so we don't break Python
+        try:
+            return self.__dict__[key]
+        except KeyError:
+            raise AttributeError(key)
+
+
+def load_json(path):
+    if os.path.exists(path):
+        with open(path) as json_file:
+            return json.load(json_file)
+    else:
+        print('file not found')
+        return {'result': None}
+
+
+def save_json(new_json, path):
+    with open(path, "w") as json_file:
+        json.dump(new_json, json_file, indent=2)
+
+
+def save_file(the_bytes, path):
+    with open(path, "wb") as the_file:
+        the_file.write(the_bytes)
+
+
+config = DictObject(load_json('config.json'))
+options = config.sat_options
+data_store = load_json(config.data_store)
+
+
+def set_login_flare():
+    now = datetime.now()
+    ts = datetime.timestamp(now)
+    token = jwt.encode(
+        {"user_id": "admin", "t": ts},
+        app.config["SECRET_KEY"],
+        algorithm="HS256"
+    )
+    app.config["flare"] = token
+    print(token.decode('utf-8'))
+
+
+def set_pid():
+    fh = open(config.data_path+"/app_process.pid", "w")
+    pid = str(getpid())
+    fh.write(pid)
+    fh.close()
+    print('process_id saved [{}]'.format(pid))
+
+
+class MyFlaskApp(Flask):
+    def run(self, host=None, port=None, debug=None, load_dotenv=True, **options):
+        if not self.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
+            with self.app_context():
+                set_login_flare()
+                set_pid()
+        super(MyFlaskApp, self).run(host=host, port=port, debug=debug, load_dotenv=load_dotenv, **options)
+
+
 # initialization
-app = Flask(__name__)
+app = MyFlaskApp(__name__)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 app.config['SECRET_KEY'] = os.environ['SPAM']
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
@@ -73,33 +153,6 @@ class User(db.Model):
             return None    # invalid token
         user = User.query.get(data['id'])
         return user
-
-
-class DictObject:
-    def __init__(self, response):
-        self.__dict__['_response'] = response
-
-    def __getitem__(self, key):
-        try:
-            return self.__dict__['_response'][key]
-        except KeyError:
-            pass
-        try:
-            return self.__dict__[key]
-        except KeyError:
-            raise AttributeError(key)
-
-    def __getattr__(self, key):
-        # First, try to return from _response
-        try:
-            return self.__dict__['_response'][key]
-        except KeyError:
-            pass
-        # If that fails, return default behavior so we don't break Python
-        try:
-            return self.__dict__[key]
-        except KeyError:
-            raise AttributeError(key)
 
 
 @app.route('/api/users', methods=['POST'])
@@ -146,28 +199,7 @@ def verify_password(username_or_token, password):
     return True
 
 
-def load_json(path):
-    if os.path.exists(path):
-        with open(path) as json_file:
-            return json.load(json_file)
-    else:
-        print('file not found')
-        return {'result': None}
 
-
-def save_json(new_json, path):
-    with open(path, "w") as json_file:
-        json.dump(new_json, json_file, indent=2)
-
-
-def save_file(the_bytes, path):
-    with open(path, "wb") as the_file:
-        the_file.write(the_bytes)
-
-
-config = DictObject(load_json('config.json'))
-options = config.sat_options
-data_store = load_json(config.data_store)
 
 
 
@@ -481,16 +513,10 @@ def page_not_found(e):
     return jsonify({'error': str(e)})
 
 
-def set_login_flare():
-    now = datetime.now()
-    ts = datetime.timestamp(now)
-    token = jwt.encode(
-        {"user_id": "admin", "t": ts},
-        app.config["SECRET_KEY"],
-        algorithm="HS256"
-    )
-    app.config["flare"] = token
-    return token.decode('utf-8')
+
+
+
+
 
 
 
@@ -500,10 +526,7 @@ if __name__ == '__main__':
     #format= '%(asctime)s-%(process)d-%(levelname)s-%(message)s'
     # logging.basicConfig(filename='app.log', filemode='w+', format='%(asctime)s-%(process)d-%(levelname)s-%(message)s')
 
-    print("Creating PID file.")
-    fh = open(config.data_path+"/app_process.pid", "w")
-    fh.write(str(getpid()))
-    fh.close()
+
 
     with app.app_context():
         if not os.path.exists('db.sqlite'):
@@ -511,6 +534,5 @@ if __name__ == '__main__':
         #test_connection(app)
 
     #handshake_send()
-
-
+    # app = MyFlaskApp(__name__)
     app.run(debug=True, port=os.getenv("PORT", default=5000))
