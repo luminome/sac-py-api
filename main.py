@@ -527,6 +527,7 @@ if __name__ == '__main__':
     # logging.basicConfig(filename='app.log', filemode='w+', format='%(asctime)s-%(process)d-%(levelname)s-%(message)s')
 
     with app.app_context():
+        print('init db.')
         if not os.path.exists('db.sqlite'):
             db.create_all()
         #test_connection(app)
