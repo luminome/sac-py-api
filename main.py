@@ -531,11 +531,11 @@ def environment():
     except AttributeError:
         r = None
     #
-    # with app.app_context():
-    #     print('init db.')
-    #
-    #     if not os.path.exists('db.sqlite'):
-    #         db.create_all()
+    with app.app_context():
+        print('init db.')
+
+        if not os.path.exists('db.sqlite'):
+            db.create_all()
     #, 'f': app.config["flare"].decode('utf-8')
 
     data = {'message': 'Done', 'code': 'SUCCESS', 'r': r}
