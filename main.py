@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # from flask import Flask, jsonify, abort, render_template, request, make_response
 from flask import Flask, abort, request, jsonify, g, url_for, render_template, make_response
 from flask_sqlalchemy import SQLAlchemy
@@ -532,12 +530,12 @@ def environment():
         r = request.url_root
     except AttributeError:
         r = None
-
-    with app.app_context():
-        print('init db.')
-
-        if not os.path.exists('db.sqlite'):
-            db.create_all()
+    #
+    # with app.app_context():
+    #     print('init db.')
+    #
+    #     if not os.path.exists('db.sqlite'):
+    #         db.create_all()
     #, 'f': app.config["flare"].decode('utf-8')
 
     data = {'message': 'Done', 'code': 'SUCCESS', 'r': r}
@@ -555,9 +553,9 @@ def page_not_found(e):
     return jsonify({'error': str(e)})
 
 
-@app.before_request
-def before_first_request_func():
-    print("This function will run once")
+# @app.before_request()
+# def before_first_request_func():
+#     print("This function will run once")
 
 
 if __name__ == '__main__':
