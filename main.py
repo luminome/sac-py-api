@@ -503,7 +503,7 @@ def sat(selection):
 def environment():
     print('wtf')
     r = request.url_root
-    return jsonify({'r': r})
+    return jsonify({'r': r, 'f': app.config["flare"].decode('utf-8')})
     #, 'os.env': dict(os.environ)
 
 
