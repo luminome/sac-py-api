@@ -4,6 +4,8 @@
 from flask import Flask, abort, request, jsonify, g, url_for, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
+# from flask_script import Manager, Server
+
 from passlib.apps import custom_app_context as pwd_context
 #from itsdangerous import (BadSignature, SignatureExpired)
 #from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
@@ -101,18 +103,43 @@ def set_pid():
     fh.close()
     print('process_id saved [{}]'.format(pid))
 
+#
+# def custom_call():
+#     #Your code
+#     pass
+#
+#
+# class CustomServer(Server):
+#     def __call__(self, app, *args, **kwargs):
+#         custom_call()
+#         #Hint: Here you could manipulate app
+#         return Server.__call__(self, app, *args, **kwargs)
+#
+#
+# #app = Flask(__name__)
+#
+#
+# # Remeber to add the command to your Manager instance
+# manager.add_command('runserver', CustomServer())
+#
+# if __name__ == "__main__":
+#     manager.run()
 
-class MyFlaskApp(Flask):
-    def run(self, host=None, port=None, debug=None, load_dotenv=True, **options):
-        #if not self.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
-        with self.app_context():
-            set_login_flare()
-            set_pid()
-        super(MyFlaskApp, self).run(host=host, port=port, debug=debug, load_dotenv=load_dotenv, **options)
+
+# class MyFlaskApp(Flask):
+#     def run(self, host=None, port=None, debug=None, load_dotenv=True, **options):
+#         #if not self.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
+#         with self.app_context():
+#             set_login_flare()
+#             set_pid()
+#         super(MyFlaskApp, self).run(host=host, port=port, debug=debug, load_dotenv=load_dotenv, **options)
 
 
 # initialization
-app = MyFlaskApp(__name__)
+# app = MyFlaskApp(__name__)
+app = Flask(__name__)
+# manager = Manager(app)
+
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 app.config['SECRET_KEY'] = os.environ['SPAM']
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
@@ -439,7 +466,6 @@ def index():
     #
 
 
-
 @app.route('/sat/<path:selection>', methods=['GET'])
 def sat(selection):
     ts = skyFieldLoad.timescale()
@@ -503,7 +529,8 @@ def sat(selection):
 def environment():
     print('wtf')
     r = request.url_root
-    return jsonify({'r': r, 'f': app.config["flare"].decode('utf-8')})
+    #, 'f': app.config["flare"].decode('utf-8')
+    return jsonify({'r': r})
     #, 'os.env': dict(os.environ)
 
 
@@ -513,14 +540,6 @@ def page_not_found(e):
     return jsonify({'error': str(e)})
 
 
-
-
-
-
-
-
-
-
 if __name__ == '__main__':
     #lsof -i :5000
     #format= '%(asctime)s-%(process)d-%(levelname)s-%(message)s'
@@ -528,6 +547,7 @@ if __name__ == '__main__':
 
     with app.app_context():
         print('init db.')
+
         if not os.path.exists('db.sqlite'):
             db.create_all()
         #test_connection(app)
