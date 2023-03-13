@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# from flask import Flask, jsonify, abort, render_template, request
-from flask import Flask, abort, request, jsonify, g, url_for, render_template
+# from flask import Flask, jsonify, abort, render_template, request, make_response
+from flask import Flask, abort, request, jsonify, g, url_for, render_template, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_httpauth import HTTPBasicAuth
 # from flask_script import Manager, Server
@@ -528,9 +528,18 @@ def sat(selection):
 @app.route('/env')
 def environment():
     print('wtf')
-    r = request.url_root
+    try:
+        r = request.url_root
+    except AttributeError:
+        r = None
     #, 'f': app.config["flare"].decode('utf-8')
-    return jsonify({'r': r})
+
+    data = {'message': 'Done', 'code': 'SUCCESS', 'r': r}
+    return make_response(jsonify(data), 200)
+
+    # resp = jsonify({'r': r})
+    # resp.status_code = 200
+    # return
     #, 'os.env': dict(os.environ)
 
 
