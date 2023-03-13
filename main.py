@@ -104,10 +104,10 @@ def set_pid():
 
 class MyFlaskApp(Flask):
     def run(self, host=None, port=None, debug=None, load_dotenv=True, **options):
-        if not self.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
-            with self.app_context():
-                set_login_flare()
-                set_pid()
+        #if not self.debug or os.getenv('WERKZEUG_RUN_MAIN') == 'true':
+        with self.app_context():
+            set_login_flare()
+            set_pid()
         super(MyFlaskApp, self).run(host=host, port=port, debug=debug, load_dotenv=load_dotenv, **options)
 
 
@@ -525,8 +525,6 @@ if __name__ == '__main__':
     #lsof -i :5000
     #format= '%(asctime)s-%(process)d-%(levelname)s-%(message)s'
     # logging.basicConfig(filename='app.log', filemode='w+', format='%(asctime)s-%(process)d-%(levelname)s-%(message)s')
-
-
 
     with app.app_context():
         if not os.path.exists('db.sqlite'):
