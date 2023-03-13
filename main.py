@@ -375,19 +375,19 @@ def get_sources():
 
 
 # The actual decorator function
-def require_api_key(view_function):
-    @wraps(view_function)
-    # the new, post-decoration function. Note *args and **kwargs here.
-    def decorated_function(*args, **kwargs):
-        key = os.environ['SPAM']
-        #if request.args.get('key') and request.args.get('key') == key:
-        if request.headers.get('x-api-key') and request.headers.get('x-api-key') == key:
-            return view_function(*args, **kwargs)
-        else:
-            print("invalidated")
-            abort(404, description="api_key missing or incorrect.")
-
-    return decorated_function
+# def require_api_key(view_function):
+#     @wraps(view_function)
+#     # the new, post-decoration function. Note *args and **kwargs here.
+#     def decorated_function(*args, **kwargs):
+#         key = os.environ['SPAM']
+#         #if request.args.get('key') and request.args.get('key') == key:
+#         if request.headers.get('x-api-key') and request.headers.get('x-api-key') == key:
+#             return view_function(*args, **kwargs)
+#         else:
+#             print("invalidated")
+#             abort(404, description="api_key missing or incorrect.")
+#
+#     return decorated_function
 
 
 @app.route('/io2/', methods=['GET'])
@@ -404,17 +404,17 @@ def get_io():
     return jsonify({'result': [{'msg': 'something posted'}, request.json], 'time': None})
 
 
-@app.route('/lsmft', methods=['GET'])
-def lsmft():
-#    print(request.request.environ)
-    output = []
-    for i, element in enumerate(request.environ.keys()):
-        t = request.environ[element]
-        if t.__class__ == str:
-            print(element, t)
-            output.append([element, t])
-
-    return jsonify({'r': output})
+# @app.route('/lsmft', methods=['GET'])
+# def lsmft():
+# #    print(request.request.environ)
+#     output = []
+#     for i, element in enumerate(request.environ.keys()):
+#         t = request.environ[element]
+#         if t.__class__ == str:
+#             print(element, t)
+#             output.append([element, t])
+#
+#     return jsonify({'r': output})
 
 
 @app.route('/', methods=['GET'])
@@ -568,4 +568,11 @@ if __name__ == '__main__':
 
     #handshake_send()
     # app = MyFlaskApp(__name__)
+
+    with app.app_context():
+        print('init db.')
+
+        if not os.path.exists('db.sqlite'):
+            db.create_all()
+
     app.run(debug=True, port=os.getenv("PORT", default=5000))
