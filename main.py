@@ -555,10 +555,9 @@ def page_not_found(e):
     return jsonify({'error': str(e)})
 
 
-@app.before_first_request
+@app.before_request
 def before_first_request_func():
     print("This function will run once")
-
 
 
 if __name__ == '__main__':
