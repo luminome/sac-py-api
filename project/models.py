@@ -22,7 +22,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(100), unique=True)
     name = db.Column(db.String(32), index=True)
-    password = db.Column(db.String(100))
+    password = db.Column(db.String(256))
     transaction_token = db.Column(db.String(256))
     tx = db.Column(db.Integer, default=0)
 
