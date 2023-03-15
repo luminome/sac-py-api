@@ -1,0 +1,136 @@
+
+body {
+    background-color: rgba(50,50,50,1.0);
+    color: gray;
+    font-family: heavy_data, sans-serif;
+    font-size: 0.9em;
+    line-height: 1.2em;
+}
+
+.row {
+    /*border: 1px red dotted;*/
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: auto;
+    margin-bottom: 0.9em;
+    color: antiquewhite;
+    font-size: 1.5em;
+}
+
+.column {
+    /*border: 1px red dotted;*/
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.right {
+    text-align: right;
+}
+
+div.container{
+    background-color: rgba(0,0,0.2,1.0);
+    margin: 2%;
+}
+
+a, .md-link, a .svg-positive{
+    text-decoration: none;
+    color: antiquewhite;
+    fill: antiquewhite;
+}
+
+a:visited, .md-link:visited, a:visited .svg-positive{
+    color: lightgray;
+    fill: lightgray;
+}
+
+.link-box{
+    /*border: 1px red dotted;*/
+    width: auto;
+    max-width: 100%;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+    text-overflow: ellipsis;
+}
+
+.link-full:hover .link-icon{
+    opacity: 1.0;
+}
+
+.link-full{
+    white-space: nowrap;
+}
+
+.markdown{
+    background-color: rgba(50,50,50,0.5);
+    margin: 0.5em 0;
+}
+
+p{
+    margin-block-start: 0px;
+    margin-block-end: 0px;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+}
+
+pre{
+    background-color: rgba(50,50,50,0.75);
+    overflow-x: scroll;
+}
+
+pre, blockquote, div.container, div.markdown{
+    padding:2%;
+}
+
+
+
+img, pre, blockquote, div.container, div.markdown{
+    border-radius:14px;
+}
+
+@font-face {
+    font-family: heavy_data;
+    font-weight: normal;
+    font-feature-settings: normal;
+    src: url(/font/dinregularwebfont.ttf);
+}
+
+@font-face {
+    font-family: heavy_data_bold;
+    src: url(/font/din-medium.ttf);
+}
+
+.link-icon {
+    width:1em;
+    vertical-align:text-top;
+    margin-right:2px;
+    opacity:0.5;
+}
+
+.svg-mask{
+    fill:#333333;
+}
+
+.svg-positive{
+    fill:darkorange;
+}
+
+.hidden{
+    display: none;
+}
+
+#credit .sac-icon{
+    width: 32px;
+    vertical-align: middle;
+}
+
+.container.minimize p,
+.container.minimize .markdown{
+    display: none;
+}
+
+.container.minimize .row{
+    margin:0;
+}

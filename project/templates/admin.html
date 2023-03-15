@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div id="bank" class="container">
+    <div>
+        {{ name }}
+        <a href="/logout" data-ref="one">logout {{ name }}</a>
+        <a href="#" data-ref="acquire">one</a>
+        <a href="#" data-ref="modify" data-cmd="file_test">two</a>
+    </div>
+    <div>
+        <a href="#" data-ref="modify" data-cmd="update_repository_data">update files from git</a>
+        <a href="#" data-ref="modify" data-cmd="get_data_store">get data store</a>
+        <a href="#" data-ref="modify" data-cmd="get_data_store_array">get data store array</a>
+        <div>
+            <span>maintenance mode:</span>
+            <a href="#" data-ref="modify" data-cmd="configure" data-arg="maintenance_mode:False">False</a>
+            <a href="#" data-ref="modify" data-cmd="configure" data-arg="maintenance_mode:True">True</a>
+        </div>
+    </div>
+    <div id="result"></div>
+</div>
+
+<script type="module" src="{{url_for('static', filename='js/admin.js')}}"></script>
+
+{% endblock %}

@@ -1,0 +1,34 @@
+<!-- templates/index.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="meta_container">
+
+<div class="container">
+	<div class="row">
+		<div class="column">{{header.root}}</div>
+		<div class="column right">{{header.id}}</div>
+	</div>
+	<p><a href="https://scottandrecampbell.com">See also: scottandrecampbell.com</a></p>
+	<span>this is everything at github.com</span>
+</div>
+
+
+{% for mkd_text in result %}
+	<div class="container">
+		<div class="row">
+			<div class="column title">{{mkd_text.name}}</div>
+			<div class="column right">{{mkd_text.id}}</div>
+		</div>
+		<p class="date">{{mkd_text.updated}}</p>
+		<p>{{mkd_text.description}}</p>
+		<p><a href="{{mkd_text.html_url}}">{{mkd_text.html_url}}</a></p>
+		<div class="markdown">{{mkd_text.file|markdown}}</div>
+	</div>
+{% endfor %}
+
+</div>
+
+{% endblock %}

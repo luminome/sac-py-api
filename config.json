@@ -1,10 +1,11 @@
 {
+  "maintenance_mode": "True",
   "drive_conf_url": "https://drive.google.com/uc?id=1SQuiUowLj9WZ6cFHYxrPKslzI1rw7Eul",
   "sat_options": ["sun", "moon", "venus", "mars", "iss"],
   "source_path": "static/sources",
-  "data_path": "static/data",
+  "data_path": "data",
   "att": 1,
   "sites": "/Users/sac/Sites",
   "sites_omitted_dirs": [".git", ".idea", ".parcel-cache", "dist", "node_modules", "three"],
-  "data_store" : "static/data/data-store.json"
+  "data_store_path" : "data/data-store.json"
 }
