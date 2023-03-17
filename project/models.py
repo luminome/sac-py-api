@@ -26,16 +26,6 @@ class User(UserMixin, db.Model):
     transaction_token = db.Column(db.String(256))
     tx = db.Column(db.Integer, default=0)
 
-
-    #
-    # def hash_password(self, password):
-    #     self.password_hash = pwd_context.hash(password)
-
-    # def verify_password(self, password):
-    #     return pwd_context.verify(password, self.password_hash)
-    # def generate_transaction_token(self, expiration=60):
-
-
     def generate_transaction_token(self, expiration=60):
         now = datetime.datetime.now(tz=timezone.utc)
         ts = datetime.datetime.timestamp(now)

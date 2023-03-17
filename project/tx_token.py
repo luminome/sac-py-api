@@ -30,7 +30,7 @@ def start_transaction():
     the_tx_token = current_user.generate_transaction_token()
     carat = {
         "message": "Hello, {} attached is the requested tx_token".format(current_user.name),
-        "tx_token": the_tx_token.decode('utf-8'),
+        "tx_token": the_tx_token,  #the_tx_token.decode('utf-8'),
         "tx": current_user.tx
     }
 
