@@ -1,5 +1,11 @@
 {
+  "index_message": "this is everything at github.com",
   "maintenance_mode": "True",
+  "base_url": "http://localhost:5000/",
+  "has_sent_confirm": "False",
+  "has_credentials": "False",
+  "has_verification": "False",
+  "master_auth": "0x000000",
   "drive_conf_url": "https://drive.google.com/uc?id=1SQuiUowLj9WZ6cFHYxrPKslzI1rw7Eul",
   "sat_options": ["sun", "moon", "venus", "mars", "iss"],
   "source_path": "static/sources",

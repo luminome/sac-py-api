@@ -1,6 +1,12 @@
 import os
 import json
 from time import perf_counter
+from google_quick import gmail_init
+import datetime
+from datetime import timezone
+from werkzeug.security import generate_password_hash
+from flask import current_app
+
 
 class DictObject:
     def __init__(self, response):
@@ -32,6 +38,14 @@ class DictObject:
             raise AttributeError(key)
 
 
+def get_antigen() -> str:
+    now = datetime.datetime.now(tz=timezone.utc)
+    ts = datetime.datetime.timestamp(now)
+    antigen = generate_password_hash(str(ts), method='sha256')
+    current_app.config['run_config'].master_auth = antigen
+    return antigen
+
+
 def pre_configure():
     root_path = os.path.abspath(os.curdir)
     conf_path = 'config-local.json'  #os.path.join(root_path, 'config-local.json')
@@ -42,6 +56,7 @@ def pre_configure():
             os.environ['SPAM_ADMIN_MAIL'] = config.mail
             os.environ['SPAM_ADMIN_PASS'] = config.pass_cred
             os.environ['SPAM'] = config.key
+            os.environ['BASE_URI'] = config.base
 
     conf_path = 'config.json'  #os.path.join(root_path, 'config.json')
     with open(conf_path) as json_file:

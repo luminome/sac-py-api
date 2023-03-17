@@ -408,7 +408,19 @@ function validate_action(evt){
 
 	if(e.dataset.ref === 'modify'){
 		console.log('testing modify');
-		const payload = e.dataset.cmd ? e.dataset.cmd : Array.from(utf8Encode.encode(resources['md_file']));
+		//const payload = e.dataset.cmd ? e.dataset.cmd : Array.from(utf8Encode.encode(resources['md_file']));
+		let payload = null;
+
+		if(e.dataset.cmd === 'expectations'){
+			const input_data = document.getElementById('pre-data');
+			if(input_data.value.length){
+				payload = Array.from(utf8Encode.encode(input_data.value));
+			}
+		}else{
+			payload = e.dataset.cmd;
+		}
+
+
 		const obj = [{url:'/admin/', type:'json', modify:true, cmd:e.dataset.cmd, arg:e.dataset.arg, tx_token:resources.tx_token, b:payload}]
 		uiBasicLoader(obj).then(result => server_callback(result));
 	}
