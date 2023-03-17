@@ -1,4 +1,9 @@
+click
 Flask_HTTPAuth==4.7.0
+Flask-Markdown
+Markdown
+Jinja2
+MarkupSafe
 Werkzeug==2.2.3
 itsdangerous==2.0.1
 gunicorn==20.0.4
