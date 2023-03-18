@@ -89,7 +89,7 @@ def save_json(new_json, path):
 
 
 def save_file(the_bytes, path):
-    with open(path, "wb") as the_file:
+    with open(path, "wb+") as the_file:
         the_file.write(the_bytes)
 
 
@@ -139,6 +139,9 @@ def put_file_path(app, args=None):
 
     if 'path' in args and args['path'] is not None:
         if os.path.exists(args['path']):
+            path = args['path']
+            save_able = True
+        if os.path.exists(os.path.dirname(args['path'])):
             path = args['path']
             save_able = True
 
