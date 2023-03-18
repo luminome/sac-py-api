@@ -4,13 +4,12 @@
 <div id="bank" class="container">
     <div>
         {{ name }}[Authorized:{{ state }}]
-        <a href="/logout" data-ref="one">logout {{ name }}</a>
-        <a href="#" data-ref="acquire">one</a>
-
     </div>
     <div>
-        <a href="#" data-ref="modify" data-cmd="expectations">two</a>
-        <input id="pre-data"/>
+        <a href="#" data-ref="modify" data-cmd="expectations">submit credential</a>
+        <div id="tx-info"></div>
+        <div id="text-field"></div>
+        <div id="tx-trace"></div>
     </div>
     <div id="result"></div>
 </div>

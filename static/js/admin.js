@@ -1,4 +1,4 @@
-//import data_store from "./static/data/data-store.json"
+import {eztext} from "./eztext.js";
 
 function do_callback(callback, value, args=null){
 	if (callback && typeof(callback) === "function") callback(value, args);
@@ -221,208 +221,218 @@ async function uiBasicLoader(resource_obj_list, prog_callback=null) {
 }
 
 console.log('running locally');
-const page_output = document.getElementById('output');
 const utf8Encode = new TextEncoder();
-const utf8Decode = new TextDecoder();
+
+const resources = {}
+
+function responder(dom_tgt, trace_tgt){
+
+	const field_struct = [
+		{n:'div', id: 'message', label:'MSG'},
+		{n:'input', id: 'path', label:'PATH'},
+		{n:'div', id: 'status', label:'RS'},
+		{n:'div', id: 'time', label:'TD'},
+		{n:'div', id: 'command', label:'CMD'}
+	]
+
+	function set_field(field, value){
+		if(field.tagName === 'INPUT') return field.value = value;
+		if(field.tagName === 'DIV') return field.innerHTML = value;
+	}
 
 
-function decode_uint_array(el){
-	const ref = Object.entries(el).map(e=> e[1]);
-	const ref_arr = new Uint8Array(ref);
-	console.log(ref_arr);
-	return utf8Decode.decode(ref_arr);
-}
+	function update(obj){
+		console.log(obj);
+		let path = null;
+		let file = null;
+		let link = null;
+		let file_type = null;
+		//let message = obj.message ?? null;
 
+		if(obj.data){
+			link = obj.data.link ?? false;
+			path = obj.data.path ?? false;
+			file = obj.data['file-body'] ?? false;
 
-const loaded_assets = {};
+			if(link){
+				re.link_node.style.display = ['none','block'][+(link !== false)];
+				re.link_node.innerHTML = link;
+			}
 
-
-function loaded_sources(resource){
-	for(let r of resource){
-
-		if(r.raw.hasOwnProperty('error')){
-			alert(r.raw.error);
-			continue;
-		}
-
-		if(r.type === 'md'){
-			loaded_assets[r.name] = r.raw;
-			const output = document.createElement('div');
-			output.classList.add('row');
-			output.innerHTML = r.raw;
-			page_output.appendChild(output);
-		}
-
-		const data = r.raw;
-
-		if(r.type === 'json') {
-			Object.entries(data.result).map(d => {
-				console.log(d);
-				if (d[1] !== null) {
-					const output = document.createElement('div');
-					output.classList.add('row');
-					Object.entries(d[1]).map(s_d => {
-						//if(s_d[0] === 'b')
-						const s_output = document.createElement('div');
-						s_output.classList.add('column');
-						s_output.innerHTML = s_d[0] === 'b' ? decode_uint_array(s_d[1]) : s_d[1];
-						output.appendChild(s_output);
-					})
-
-					page_output.appendChild(output);
+			if(path){
+				if(path.indexOf('.') !== -1){
+					file_type = path.split('.').pop();
 				}
-			})
+			}
+
+			if(file){
+				if(file_type === 'json' || file_type === null){
+					JAM.set_text(JSON.stringify(file, re.json_cleaner, '\t'));
+				}else{
+					JAM.set_text(`${file.toString()}`);
+				}
+			}
 		}
 
-		const output = document.createElement('div');
-		output.innerHTML = `${data.time}`;
-		page_output.appendChild(output);
-		//output.classList.add('row');
-		//output.textContent = JSON.stringify(data, null, 2);
+		field_struct.map((f,i) => {
+			if(obj.hasOwnProperty(f.id)) set_field(re.fields[i], obj[f.id]);
+			if(f.id === 'path') set_field(re.fields[i], `${path}`);
+		})
+		//
+		//
+		//
+		//
+		// if(obj_format === 'json' || obj_format === null){
+		// 	JAM.set_text(JSON.stringify(output_obj, re.json_cleaner, '\t'));
+		// }else{
+		// 	JAM.set_text(`${output_obj.toString()}`);
+		// }
+
 
 
 	}
+
+
+	function init(){
+		re.target = document.getElementById(dom_tgt);
+		re.target.classList.add('res');
+		re.trace_target = document.getElementById(trace_tgt);
+
+		field_struct.map(f => {
+			const res_node = document.createElement('div');
+			res_node.classList.add('res-node');
+
+			const el_label = document.createElement('div');
+			el_label.classList.add('res-node-label');
+			el_label.innerHTML = f.label
+			const el = document.createElement(f.n);
+			el.classList.add('res-node-field');
+			el.setAttribute('id', f.id);
+
+			set_field(el,`n/a`);
+
+			res_node.appendChild(el_label);
+			res_node.appendChild(el);
+
+			re.target.appendChild(res_node);
+			re.fields.push(el);
+
+		})
+
+		re.link_node = document.createElement('div');
+		re.link_node.classList.add('res-link');
+		re.link_node.innerHTML = 'link';
+		re.link_node.style.display = 'none';
+		re.target.parentNode.insertBefore(re.link_node, re.target);
+
+		return re;
+	}
+
+	function json_cleaner(k, v){
+		//#if(k === 'file') return `[data shortened (${v.length})chars]`;
+		return v
+	}
+
+	function trace(t, reset){
+		if(reset) re.trace_target.innerHTML = '';
+		re.trace_target.innerHTML += `${t}<br>`;
+	}
+
+	const re = {
+		link_field: null,
+		fields:[],
+		target: null,
+		trace_target: null,
+		init,
+		trace,
+		update,
+		json_cleaner
+	}
+
+	return re
+
 }
-
-
-
-//
-// // const obj = [
-// // 	{url:'http://localhost:5000/sources', type:'json'},
-// // 	{url:'http://localhost:5000/data_store', type:'json'},
-// // 	{url:'http://localhost:5000/io', type:'json', post:true}]
-//
-// let fpt = 'this is my severly borked\"and ecsaped thing with <> and #$%^&*(';
-//
-// console.log(utf8Encode.encode(fpt));
-//
-// const obj = [
-// 	// {name:'md_file', url:'https://luminome.com/static/sources/sac-py-api.md', type:'md'},
-// 	// {url:'https://luminome.com/data_store', type:'json'},
-// 	{url:'http://localhost:5000/api/token/', type:'json', post:true, b:utf8Encode.encode(fpt)}]
-//
-//
-// //
-// // uiBasicLoader(obj).then(result => loaded_sources(result));
-//
-// const validated = {'state':null, 'kw':null};
-//
-//
-// function validation_process(resource) {
-// 	for (let r of resource) {
-// 		console.log(r.raw);
-// 		if(r.raw.hasOwnProperty('username')){
-// 			validated.state = 'user_set';
-// 		}
-// 		if(r.raw.hasOwnProperty('token')){
-// 			validated.state = 'token_set';
-// 			validated.token = r.raw.token;
-// 			console.log('token saved', validated);
-// 		}
-// 	}
-// }
-//
-//
-// //phase one: create a user
-// const kw = document.getElementById('kw');
-// kw.addEventListener('change', validate);
-//
-// // const pw = document.getElementById('pw');
-// // pw.addEventListener('change', validate);
-//
-// const tst = document.getElementById('trigger');
-// tst.addEventListener('click', validate);
-//
-// const message = document.getElementById('message');
-//
-// function recall(resource){
-// 	for (let r of resource) {
-// 		console.log(r);
-// 		if(r.raw.hasOwnProperty('error')) message.innerHTML = r.raw.error;
-// 		//if(r.raw.hasOwnProperty('tx_token')) validated.kw = r.raw.tx_token;
-// 		kw.value = validated.kw;
-// 	}
-// }
-//
-// function validate(evt){
-//
-// 	validated[evt.target.id] = evt.target.value;
-//
-// 	if(kw.value) validated['kw'] = kw.value;
-//
-// 	console.log(validated);
-//
-// 	if(validated.hasOwnProperty('kw')) {
-// 		const obj = [{url:'http://localhost:5000/admin/', v:validated, type:'json', test:true, b:utf8Encode.encode(fpt)}]
-// 		uiBasicLoader(obj).then(result => recall(result));
-// 	}
-// }
-
-// console.log(document.querySelectorAll('a[data-ref]'));
-// console.log(Base64.encode('okay'));
-
-const resources = {}
-const server_result = document.getElementById('result');
 
 function server_callback(resource){
 	for (let r of resource) {
-		console.log(r);
-
-		const ref = Object.entries(r.raw).map((r,n)=> {
-			return `${n} ${r[0]}: ${r[1]}`
-		});
-		
-		server_result.innerHTML += ref.join('</br>')+'</br>';
-
+		//console.log(r);
+		RES.trace(`transaction completed with ${r.raw.status === 0 ? 'failure' : 'success'}`, true);
+		RES.update(r.raw);
 		if(r.acquire){
-			if(r.raw.hasOwnProperty('tx_token')) resources.tx_token = r.raw.tx_token;
+			if(r.raw.tx_token) resources.tx_token = r.raw.tx_token;
 		}
-
 		if(r.modify){
-			if(r.raw.hasOwnProperty('data')) resources.data = r.raw.data;
+			if(r.raw.data) resources.data = r.raw.data;
 		}
-
-		console.log(resources);
 	}
 }
 
-function loaded_resources(resource) {
-	for (let r of resource) {
-
-		resources[r.name] = r.raw;
-		console.log(resources);
+function make_transaction(tx_result, next_objects){
+	resources.tx_token = null;
+	for (let r of tx_result) {
+		if(r.raw.hasOwnProperty('tx_token')) resources.tx_token = r.raw.tx_token;
+		RES.update(r.raw);
+	}
+	if(resources.tx_token !== null){
+		RES.trace('token acquired, proceeding.');
+		next_objects.map(obj => {
+			obj.tx_token = resources.tx_token;
+		})
+		uiBasicLoader(next_objects).then(result => server_callback(result));
 	}
 }
 
-
-
+function get_transaction(next_objects){
+	RES.trace('acquiring token before proceeding.');
+	const obj = [{url:'/acquire-transaction/', type:'json', acquire:true}]
+	uiBasicLoader(obj).then(result => make_transaction(result, next_objects));
+}
 
 function validate_action(evt){
 	const e = evt.target;
 
 	if(e.dataset.ref === 'acquire'){
-		console.log('testing acquire');
+		RES.trace('testing acquire');
 		const obj = [{url:'/acquire-transaction/', type:'json', acquire:true}]
 		uiBasicLoader(obj).then(result => server_callback(result));
 	}
 
 	if(e.dataset.ref === 'modify'){
-		console.log('testing modify');
-		//const payload = e.dataset.cmd ? e.dataset.cmd : Array.from(utf8Encode.encode(resources['md_file']));
+		RES.trace(`testing modify cmd:${e.dataset.cmd}`);
 		let payload = null;
+		let value = null;
+		let path = null;
 
-		if(e.dataset.cmd === 'expectations'){
-			const input_data = document.getElementById('pre-data');
-			if(input_data.value.length){
-				payload = Array.from(utf8Encode.encode(input_data.value));
+		if(e.dataset.cmd === 'expectations') {
+			const input_data = JAM.get_text();
+			if (input_data.length) {
+				payload = Array.from(utf8Encode.encode(input_data));
 			}
-		}else{
-			payload = e.dataset.cmd;
+		}else if(e.dataset.cmd === 'put_file_path'){
+			const input_data = JAM.get_text();
+			path = document.querySelector('#path.res-node-field').value;
+
+			if (input_data.length) {
+				payload = Array.from(utf8Encode.encode(input_data));
+			}
+		}else if(e.dataset.cmd === 'get_file_path'){
+			path = JAM.get_text();
 		}
 
+		const obj = [{
+			url:'/admin/',
+			type:'json',
+			modify:true,
+			tx_token:resources.tx_token,
+			cmd:e.dataset.cmd,
+			arg:{
+				payload:payload,
+				value:e.dataset.arg,
+				path:path
+			}
 
-		const obj = [{url:'/admin/', type:'json', modify:true, cmd:e.dataset.cmd, arg:e.dataset.arg, tx_token:resources.tx_token, b:payload}]
-		uiBasicLoader(obj).then(result => server_callback(result));
+		}]
+		get_transaction(obj);
 	}
 
 }
@@ -432,10 +442,9 @@ for (let e of elements) {
 	e.addEventListener('click', validate_action);
 }
 
+const JAM = eztext(document.getElementById('text-field')).init();
+const RES = responder('tx-info', 'tx-trace').init();
 
-const obj = [{name:'md_file', url:'https://luminome.com/static/sources/sac-py-api.md', type:'md'}]
-uiBasicLoader(obj).then(result => loaded_resources(result));
-
-
-//
-// uiBasicLoader(obj).then(result => loaded_sources(result));
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("dom ready");
+});

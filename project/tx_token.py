@@ -30,11 +30,10 @@ def start_transaction():
     the_tx_token = current_user.generate_transaction_token()
     carat = {
         "message": "Hello, {} attached is the requested tx_token".format(current_user.name),
-        "tx_token": the_tx_token,  #the_tx_token.decode('utf-8'),
-        "tx": current_user.tx
+        "tx_token": the_tx_token,
+        "tx": current_user.tx,
+        "status": 1
     }
-
-    print(carat)
     return jsonify(carat)
 
 
@@ -42,52 +41,5 @@ def start_transaction():
 @login_required
 @auth.login_required
 def admin():
-    mod_data = None
-    mod_args = None
-
-    if request.json['cmd'] == 'expectations':
-        if request.json['b']:
-            if current_app.config['run_config'].has_credentials == "False":
-                mod_data = bytes(request.json['b'])
-                #save the expectations mod_data for login
-                try:
-                    valid_json = json.loads(mod_data)
-                    if 'web' in valid_json:
-                        save_json(valid_json, 'expectations.json')
-                        confirm = '<a href="{}">initialize expectations and send</a>'.format(gmail_init())
-                        mod_data = "saved and loaded json expectations."
-                        return jsonify({'confirm': confirm, 'message': mod_data})
-                    else:
-                        mod_data = "cannot be valid expectations"
-
-                except json.JSONDecodeError as error:
-                    mod_data = str(error)
-
-        if current_app.config['run_config'].has_credentials == "True" and request.json['b'] is not None:
-            mod_data = bytes(request.json['b']).decode('utf-8')
-            if mod_data == current_app.config['run_config'].master_auth:
-                print("here's the final stage for compare..")
-                current_app.config['run_config'].has_verification = "True"
-                confirm = '<a href="{}">credential accepted, proceed to admin</a>'.format('/admin/')
-                return jsonify({'confirm': confirm})
-
-    elif request.json['cmd'] == 'file':
-        mod_data = bytes(request.json['b']).decode('utf-8')
-
-    else:
-        mod_data = request.json['cmd']
-
-        if 'arg' in request.json:
-            mod_args = request.json['arg']
-
-        json_result = process_admin_cmd(mod_data, mod_args, current_app)
-        return jsonify(json_result)
-
-    carat = {
-        "data": mod_data
-    }
-
-    return jsonify(carat)
-
-
-
+    json_result = process_admin_cmd(current_app, request.json)
+    return jsonify(json_result)

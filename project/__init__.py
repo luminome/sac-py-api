@@ -30,7 +30,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
     app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
     app.config['INIT'] = False
-    app.config['DATA_STORE'] = load_json(config.data_store_path)
+    message, app.config['DATA_STORE'], status = load_json(config.data_store_path)
 
     app.config['run_config'] = config
     db.init_app(app)

@@ -12,35 +12,26 @@
 </head>
 
 <body>
-<div class="hero-body">
-
-    {% if request.path == url_for('main.index') and current_user.is_authenticated %}
+<div>
+    {% if current_user.is_authenticated %}
     <div class="container">
-        <a href="{{ url_for('main.admin') }}">
-            admin
-        </a>
-        <a href="{{ url_for('auth.logout') }}">
-            quit
-        </a>
+        {% if request.path == url_for('main.index') %}
+            <a href="{{ url_for('main.admin') }}">admin</a>
+        {% endif %}
+        {% if request.path == url_for('main.admin') or request.path == url_for('auth.login') %}
+            <a href="{{ url_for('main.index') }}">main</a>
+        {% endif %}
+        <a href="{{ url_for('auth.logout') }}" data-ref="one">logout {{ current_user.name }}</a>
     </div>
     {% endif %}
 
-    {% if request.path == url_for('main.admin') and current_user.is_authenticated %}
-    <div class="container">
-        <a href="{{ url_for('main.index') }}">
-            main
-        </a>
-    </div>
-    {% endif %}
-
-    <div class="has-text-centered">
+    <div>
         {% block content %}
 
         {% endblock %}
     </div>
-</div>
 
-<script type="module" src="{{url_for('static', filename='js/admin.js')}}"></script>
+</div>
 
 
 
@@ -152,6 +143,8 @@
 	// parentElement.textContent = ''
 	// parentElement.appendChild(newElement)
 </script>
+
+<!--<script type="module" src="{{url_for('static', filename='js/admin.js')}}"></script>-->
 
 
 
