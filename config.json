@@ -1,8 +1,7 @@
 {
   "index_message": "this is everything at github.com",
   "maintenance_mode": "True",
-  "requires_auth": "False",
-  "base_url": "http://localhost:5000/",
+  "requires_auth": "True",
   "has_sent_confirm": "False",
   "has_credentials": "False",
   "has_verification": "False",

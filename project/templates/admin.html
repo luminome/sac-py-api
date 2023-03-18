@@ -3,6 +3,9 @@
 {% block content %}
 <div id="bank" class="container">
     <div>
+        {{ name }}[Authorized:{{ state }}]
+    </div>
+    <div>
 
         <a href="#" data-ref="modify" data-cmd="update_repository_data">update files from git</a>
         <a href="#" data-ref="modify" data-cmd="get_data_store">get data store</a>
@@ -12,8 +15,14 @@
 
         <div>
             <span>maintenance mode:</span>
-            <a href="#" data-ref="modify" data-cmd="configure" data-arg="maintenance_mode:False">False</a>
-            <a href="#" data-ref="modify" data-cmd="configure" data-arg="maintenance_mode:True">True</a>
+            <a href="#" data-ref="modify" data-cmd="configure" data-arg="maintenance_mode:False">Off</a>
+            <a href="#" data-ref="modify" data-cmd="configure" data-arg="maintenance_mode:True">On</a>
+        </div>
+
+        <div>
+            <span>auth required:</span>
+            <a href="#" data-ref="modify" data-cmd="configure" data-arg="requires_auth:False">No</a>
+            <a href="#" data-ref="modify" data-cmd="configure" data-arg="requires_auth:True">Yes</a>
         </div>
 
         <div id="tx-info"></div>
