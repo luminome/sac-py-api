@@ -1,6 +1,6 @@
 {
   "index_message": "this is everything at github.com",
-  "maintenance_mode": "True",
+  "maintenance_mode": "False",
   "requires_auth": "True",
   "has_sent_confirm": "False",
   "has_credentials": "False",

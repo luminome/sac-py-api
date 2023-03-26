@@ -76,7 +76,6 @@ def load_json(path):
 
 
 def load_path(path):
-    print(path)
     if os.path.exists(path):
         with open(path, 'r') as _file:
             return 'ok', _file.read(), 1
